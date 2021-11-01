@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useForm } from '../../hooks/useForm';
 import { useDispatch, useSelector } from 'react-redux';
 import { uiRemoveError, uiSetError } from '../../actions/uiActions';
+import { emailPasswordRegister } from '../../actions/authActions';
 
 export const RegisterScreen = () => {
 
@@ -55,6 +56,7 @@ export const RegisterScreen = () => {
 
         if( ( isFormValid() ) ) {
             console.log('FORMULARIO CORRECTO');
+            dispatch( emailPasswordRegister( email, password, name ) );
         }
 
         console.log(name, email, password, password2);
