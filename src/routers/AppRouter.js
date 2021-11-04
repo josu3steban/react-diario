@@ -13,6 +13,7 @@ import { getAuth, onAuthStateChanged } from '@firebase/auth';
 import { app } from '../firebase/firebaseConfig';
 import { PrivateRoute } from './PrivateRoute';
 import { PublicRoute } from './PublicRoute';
+import { loadNotes } from '../actions/noteActions';
 
 export const AppRouter = () => {
 
@@ -28,6 +29,9 @@ export const AppRouter = () => {
 
                 dispatch( login( user.uid, user.displayName ));
                 setIsLogged( true );
+
+                dispatch( loadNotes( user.uid ) );
+                // loadNotes( user.uid );
 
             }else {
                 
