@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs } from "@firebase/firestore";
+import { addDoc, collection, getDocs, updateDoc, doc } from "@firebase/firestore";
 import { types } from "../types/types";
 import { db } from "../firebase/firebaseConfig";
 
@@ -47,8 +47,25 @@ export const loadNotes = ( id ) => {
     
 }
 
+export const saveNote = ( note ) => {
+    return async( dispatch, getState ) => {
+
+        const id = getState().auth.uid;
+        const noteToFirestore = { ...note };
+        delete noteToFirestore.id;
+
+        if( !noteToFirestore.url ) {
+            delete noteToFirestore.url;
+        }
+
+        const docRef = doc( db, `/${id}/diario/notes/${note.id}`);
+        await updateDoc( docRef, noteToFirestore );
+        
+    }    
+}
+
 //Activa la nota en el NoteScreen para poder escribir en ella
-const activeNote = ( id, note ) => {
+export const activeNote = ( id, note ) => {
 
     return {
         type: types.noteActive,
