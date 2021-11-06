@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, updateDoc, doc } from "@firebase/firestore";
+import { addDoc, collection, getDocs, updateDoc, doc, deleteDoc } from "@firebase/firestore";
 import { types } from "../types/types";
 import { db } from "../firebase/firebaseConfig";
 import Swal from "sweetalert2";
@@ -19,8 +19,19 @@ export const newNote = () => {
         const doc    = await addDoc(docRef, newNote);
 
         dispatch( activeNote( doc.id, newNote ) );
+        dispatch( addNoteOnScreen( doc.id, newNote ) );
     }
     
+}
+
+export const addNoteOnScreen = ( id, note ) => {
+    return {
+        type: types.noteAddNew,
+        payload: {
+            id,
+            ...note
+        }
+    }
 }
 
 export const loadNotes = ( id ) => {
@@ -68,6 +79,69 @@ export const saveNote = ( note ) => {
     }    
 }
 
+export const saveImage = ( file ) => {
+    return async( dispatch, getState ) => {
+
+        const activeNote = getState().note.active;
+
+        //configuracion para subir imagen a Cloudinary
+        const cloudUrl = 'https://api.cloudinary.com/v1_1/dpvbia22j/upload';
+        const formDate = new FormData();
+        formDate.append('upload_preset', 'react-diario');
+        formDate.append('file', file);
+
+        // try {
+
+            const resp = await fetch( cloudUrl, {
+                method: 'POST',
+                body: formDate
+            });
+
+            if( resp.ok ) {
+                // const cloudResp = await resp.json();
+                //Url de la imagen
+                // return cloudResp.secure_url;
+            } else {
+                throw await resp.json();
+            }
+            
+        // } catch( err ) {
+
+            // throw err;
+
+        // }
+
+        
+        Swal.fire({
+            title:'Cargando',
+            text:'Por favor espere...',
+            onBeforeOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        const cloudResp = await resp.json();
+        const fileUrl = cloudResp.secure_url;
+
+        activeNote.url = fileUrl;
+        
+        dispatch( saveNote( activeNote ) );
+
+        Swal.close();
+    }
+}
+
+export const deleteNote = ( noteId ) => {
+    return async( dispatch, getState ) => {
+
+        const userId = getState().auth.uid;
+        const docRef = doc(db, `${userId}/diario/notes/${noteId}`);
+        await deleteDoc( docRef );
+
+        dispatch( borrarNota( noteId ) );
+    }
+}
+
 //Activa la nota en el NoteScreen para poder escribir en ella
 export const activeNote = ( id, note ) => {
 
@@ -84,7 +158,7 @@ export const activeNote = ( id, note ) => {
 const setNote = ( notes ) => {
 
     return {
-        type: types.noteAddNew,
+        type: types.noteLoad,
         payload: notes
     }
     
@@ -100,4 +174,18 @@ export const refreshNote = ( id, note ) => {
         }
     }
     
+}
+
+const borrarNota = ( id ) => {
+    return {
+        type: types.noteDelete,
+        payload: id
+    }    
+
+}
+
+export const noteLogout = () => {
+    return {
+        type: types.noteLogoutClean,
+    }
 }

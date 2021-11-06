@@ -3,6 +3,7 @@ import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, si
 import { app, googleAuthProvider } from '../firebase/firebaseConfig'
 import { types } from "../types/types"
 import { finishLoading, startLoading } from './uiActions'
+import { noteLogout } from './noteActions'
 
 export const emailPasswordRegister = ( email, password, name ) => {
 
@@ -64,6 +65,7 @@ export const logout = () => {
         const auth = getAuth( app );
         await signOut( auth );
         dispatch( authLogout() );
+        dispatch( noteLogout() );
     }
 }
 

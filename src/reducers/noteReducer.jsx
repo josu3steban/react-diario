@@ -17,10 +17,16 @@ export const noteReducer = ( state = initilState, action ) => {
                 }
             }
         
-        case types.noteAddNew:
+        case types.noteLoad:
             return {
                 ...state,
                 note: [...action.payload]
+            }
+
+        case types.noteAddNew:
+            return {
+                ...state,
+                note: [action.payload, ...state.note]
             }
         
         case types.noteUpdate:
@@ -33,6 +39,20 @@ export const noteReducer = ( state = initilState, action ) => {
                 )
             }
             
+        case types.noteDelete:
+            return {
+                ...state,
+                active: null,
+                note: state.note.filter( note => note.id !== action.payload )
+            }
+
+        case types.noteLogoutClean:
+            return {
+                ...state,
+                active: null,
+                note: []
+            }
+        
         default:
             return state;
         
